@@ -1,0 +1,69 @@
+#!/bin/bash
+
+install() {
+  # prepare vars
+  local name="$PACKAGE_CORE_NAME"
+
+  log::info "[$(timestamp)][package][$name] preparing ..."
+
+  # get system os/arch
+  local os="$PACKAGE_OS"
+  local arch="$PACKAGE_OS_ARCH"
+  local kernel="$PACKAGE_OS_KERNEL"
+  local platform="$PACKAGE_OS_PLATFORM"
+  # usr_bin_dir
+  local usr_bin_dir="$PACKAGE_USER_BIN_DIR"
+  local tmp_dir="$PACKAGE_TMP_DIR"
+
+  # #
+  # case $platform in
+  # darwin)
+  #   platform="osx"
+  #   ;;
+  # linux) ;;
+
+  # *)
+  #   log::error "[$(timestamp)] unsupport platform: $platform"
+  #   ;;
+  # esac
+
+  # case $arch in
+  # arm64) ;;
+
+  # amd64)
+  #   arch="x86_64"
+  #   ;;
+  # *)
+  #   log::error "[$(timestamp)] unsupport arch: $arch"
+  #   ;;
+  # esac
+  # #
+
+  # files
+  local tmp_file="$name.tar.gz"
+  local source_bin_file="./${name}-${PACKAGE_CORE_VERSION#v}-${platform}-${arch}/$name"
+  # local target_bin_file="$usr_bin_dir/$name"
+
+  # prepare context
+  cd $tmp_dir
+
+  # install
+  log::info "[$(timestamp)][package][$name] installing ..."
+  if [ "$PLUGIN_PACKAGE_BUILD_FROM_SOURCE" != "true" ]; then
+    pm install -y qemu
+  else
+    # https://github.com/qemu/qemu#building
+    os::git clone --depth 1 https://github.com/qemu/qemu qemu-src
+    cd qemu-src
+    mkdir build
+    cd build
+    ../configure
+    make
+  fi
+
+  # clean
+  log::info "[$(timestamp)][package][$name] cleaning ..."
+  rm -rf $tmp_dir
+}
+
+export -f install
