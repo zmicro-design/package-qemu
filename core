@@ -50,7 +50,18 @@ install() {
   # install
   log::info "[$(timestamp)][package][$name] installing ..."
   if [ "$PLUGIN_PACKAGE_BUILD_FROM_SOURCE" != "true" ]; then
-    pm install -y qemu
+    case $os in
+      macos)
+        pm install -y qemu
+        ;;
+      ubuntu)
+        pm install -y qemu qemu-utils
+        ;;
+      *)
+        log::error "[$(timestamp)] not support in current os: $os"
+        return 1
+        ;;
+    esac
   else
     # https://github.com/qemu/qemu#building
     os::git clone --depth 1 https://github.com/qemu/qemu qemu-src
